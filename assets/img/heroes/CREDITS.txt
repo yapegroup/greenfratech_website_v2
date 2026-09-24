@@ -9,5 +9,6 @@ Licence: Unsplash Licence - free for commercial and non-commercial use,
 file           unsplash photo                       photographer
 -------------  -----------------------------------  ------------
 contact.webp   6-iunIrJtbQ (business handshake)        Ambre Esteve
+about.webp     YGkeQn55d28 (aerial forest road)     Venti Views
 
-Downloaded at 2880px, cropped to 1920x1000, re-encoded to WebP.
+Downloaded at 2400-2880px, resized and cropped to 1920x1000, re-encoded to WebP.
