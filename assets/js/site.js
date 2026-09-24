@@ -133,9 +133,27 @@
         document.body.style.overflow = '';
     }
 
+    // Odoo's fixed-header widget, reduced to what this theme needs: every page
+    // uses the overlay header, so affixing it is just a class swap from
+    // position: absolute to position: fixed once the page leaves the top.
+    function initFixedHeader() {
+        var header = document.querySelector('#wrapwrap > header.o_header_fixed');
+        if (!header) { return; }
+        var apply = function () {
+            var y = window.scrollY || document.documentElement.scrollTop || 0;
+            var affixed = y > 0;
+            header.classList.toggle('o_header_affixed', affixed);
+            header.classList.toggle('o_top_fixed_element', affixed);
+            header.classList.toggle('o_header_is_scrolled', affixed);
+        };
+        window.addEventListener('scroll', apply, { passive: true });
+        apply();
+    }
+
     // --- 3. boot ----------------------------------------------------------
     function boot() {
         initNav();
+        initFixedHeader();
         Object.keys(publicWidget.registry).forEach(function (name) {
             var W = publicWidget.registry[name];
             var sel = W.prototype && W.prototype.selector;
@@ -152,10 +170,14 @@
         });
     }
 
+    // Never boot synchronously: the widgets register themselves in the IIFE
+    // below this one, so booting here would find an empty registry. That is
+    // exactly what happens under `defer`, where readyState is already
+    // "interactive" by the time this runs.
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', boot);
     } else {
-        boot();
+        setTimeout(boot, 0);
     }
 })();
 
@@ -429,6 +451,7 @@ publicWidget.registry.GftStage = publicWidget.Widget.extend({
 
         this.progress = 0;
         this.explode = 0;
+        this.focus = 2.5;
         this.beat = -1;
         this.visible = false;
         this.raf = null;
@@ -461,6 +484,7 @@ publicWidget.registry.GftStage = publicWidget.Widget.extend({
             );
             this.el.style.removeProperty("--gft-p");
             this.el.style.removeProperty("--gft-e");
+            this.el.style.removeProperty("--gft-focus");
             this.el.removeAttribute("data-beat");
         }
         this._super(...arguments);
@@ -524,8 +548,10 @@ publicWidget.registry.GftStage = publicWidget.Widget.extend({
             // Leave no inline state behind for the other modes to inherit.
             this.el.style.removeProperty("--gft-p");
             this.el.style.removeProperty("--gft-e");
+            this.el.style.removeProperty("--gft-focus");
             this.el.removeAttribute("data-beat");
             this.progress = this.explode = 0;
+            this.focus = 2.5;
             this.beat = -1;
         }
     },
@@ -638,12 +664,22 @@ publicWidget.registry.GftStage = publicWidget.Widget.extend({
         if (Math.abs(target - this.progress) < 0.0005) { this.progress = target; }
         if (Math.abs(targetExplode - this.explode) < 0.0005) { this.explode = targetExplode; }
 
-        this.el.style.setProperty("--gft-p", this.progress.toFixed(4));
-        this.el.style.setProperty("--gft-e", this.explode.toFixed(4));
-
         // data-beat is driven by the raw target, not the eased value: the copy
         // should change when the reader has scrolled there, not a moment later.
         const beat = beatIndex(target);
+
+        // The camera's focus layer is eased here rather than by a CSS transition
+        // on the camera. Its transform also depends on --gft-p and --gft-e, which
+        // change every frame, so a transition there restarted on every frame and
+        // made the slab bounce. Beat 0 (hero) centres the stack at 2.5.
+        const targetFocus = beat === 0 ? 2.5 : beat;
+        this.focus = immediate ? targetFocus : lerp(this.focus, targetFocus, 0.12);
+        if (Math.abs(targetFocus - this.focus) < 0.001) { this.focus = targetFocus; }
+
+        this.el.style.setProperty("--gft-p", this.progress.toFixed(4));
+        this.el.style.setProperty("--gft-e", this.explode.toFixed(4));
+        this.el.style.setProperty("--gft-focus", this.focus.toFixed(4));
+
         if (beat !== this.beat) {
             this.beat = beat;
             this.el.setAttribute("data-beat", String(beat));
