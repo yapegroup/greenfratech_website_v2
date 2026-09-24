@@ -241,19 +241,25 @@ const PIN_HEIGHT_QUERY = "(min-height: 560px)";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 // Beat boundaries as a share of stage progress. The brief called for five
-// beats; this is six, because EV Sun and Green Cleaning were sharing one and
-// that meant two products competing for a single slab and a single paragraph.
+// beats; this is seven: EV Sun and Green Cleaning were split so two products
+// no longer compete for one slab, and Infra AI was added as the top layer.
 //
-//   0  0-13    hero
-//   1  13-33   bamboo geotextile
-//   2  33-53   green road
-//   3  53-71   water solutions
-//   4  71-86   sterilization lighting
-//   5  86-100  green cleaning + closing CTA
+//   0  0-11    hero
+//   1  11-28   bamboo geotextile
+//   2  28-44   green road
+//   3  44-59   water solutions
+//   4  59-73   sterilization lighting
+//   5  73-87   green cleaning
+//   6  87-100  infra AI + closing CTA
 //
-// Adding a stop here is the only JS change a sixth beat needs; the stylesheet
-// loops over 1 through 5 and the markup carries the data-beat attributes.
-const BEAT_STOPS = [0.13, 0.33, 0.53, 0.71, 0.86];
+// A new beat needs a stop here, a data-beat rule set in the stylesheet, a
+// layer and a beat in the markup, and STACK_CENTRE moved if the layer count
+// changes.
+const BEAT_STOPS = [0.11, 0.28, 0.44, 0.59, 0.73, 0.87];
+
+// Middle of the layer stack (layers 0-6). Mirrors the 3 in the stylesheet's
+// camera and layer translateZ; the hero frames the whole stack from here.
+const STACK_CENTRE = 3;
 
 // Where the navbar turns to glass. The brief says "after slight scroll", not
 // "immediately" — which is why this does not reuse Odoo's o_header_is_scrolled.
@@ -272,12 +278,11 @@ const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
  */
 function explodeAmount(p) {
     // Thresholds track BEAT_STOPS: fully exploded before beat 1 gets going, and
-    // holding until beat 5 starts closing it. With six beats the hold has to
-    // stretch further than it did with five.
-    if (p < 0.09) { return 0; }
-    if (p < 0.27) { return (p - 0.09) / 0.18; }
-    if (p < 0.86) { return 1; }
-    if (p < 0.98) { return 1 - (p - 0.86) / 0.12; }
+    // holding until the last beat (6) starts closing it.
+    if (p < 0.08) { return 0; }
+    if (p < 0.24) { return (p - 0.08) / 0.16; }
+    if (p < 0.87) { return 1; }
+    if (p < 0.98) { return 1 - (p - 0.87) / 0.11; }
     return 0;
 }
 
@@ -451,7 +456,7 @@ publicWidget.registry.GftStage = publicWidget.Widget.extend({
 
         this.progress = 0;
         this.explode = 0;
-        this.focus = 2.5;
+        this.focus = STACK_CENTRE;
         this.beat = -1;
         this.visible = false;
         this.raf = null;
@@ -551,7 +556,7 @@ publicWidget.registry.GftStage = publicWidget.Widget.extend({
             this.el.style.removeProperty("--gft-focus");
             this.el.removeAttribute("data-beat");
             this.progress = this.explode = 0;
-            this.focus = 2.5;
+            this.focus = STACK_CENTRE;
             this.beat = -1;
         }
     },
@@ -671,8 +676,8 @@ publicWidget.registry.GftStage = publicWidget.Widget.extend({
         // The camera's focus layer is eased here rather than by a CSS transition
         // on the camera. Its transform also depends on --gft-p and --gft-e, which
         // change every frame, so a transition there restarted on every frame and
-        // made the slab bounce. Beat 0 (hero) centres the stack at 2.5.
-        const targetFocus = beat === 0 ? 2.5 : beat;
+        // made the slab bounce. Beat 0 (hero) frames the middle of the stack.
+        const targetFocus = beat === 0 ? STACK_CENTRE : beat;
         this.focus = immediate ? targetFocus : lerp(this.focus, targetFocus, 0.12);
         if (Math.abs(targetFocus - this.focus) < 0.001) { this.focus = targetFocus; }
 
