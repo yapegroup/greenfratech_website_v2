@@ -1,0 +1,35 @@
+Infra AI page imagery
+=====================
+
+Source:  Unsplash (https://unsplash.com)
+Licence: Unsplash Licence - free for commercial and non-commercial use,
+         no permission or attribution required.
+         https://unsplash.com/license
+
+Kept here as provenance so the origin of these files is traceable if the
+site is ever audited or the images need re-sourcing at a larger size. The
+licence does not oblige us to publish attribution on the page itself.
+
+Originals were downloaded at 1200-1600px, centre-cropped and re-encoded to
+WebP at the sizes the theme's components ask for.
+
+file                        unsplash photo id
+--------------------------  --------------------------------
+heroes/infra-ai.webp        1709497197725-2e97c76b31d0
+arch-1-sensors.webp         1604177420682-0c840feb01de
+arch-2-gateway.webp         1691435828932-911a7801adfb
+arch-3-comms.webp           1582193607281-dafb7941640f
+arch-4-cloud.webp           1680992046626-418f7e910589
+arch-5-dashboard.webp       1625296276703-3fbc924f07b5
+flow-1-supply.webp          1760789149696-30ce2d28b331
+flow-2-board.webp           1558054665-fbe00cd7d920
+flow-3-meter.webp           1754734387891-36fcbb96f830
+asset-cctv.webp             1528312635006-8ea0bc49ec63
+asset-lift.webp             1758448721149-aa0ce8e1b2c9
+asset-generator.webp        1705051278299-7e64ba21437a
+asset-pump.webp             1698031610511-c7a35d121b17
+asset-hvac.webp             1783454832930-90e52aa483cf
+asset-fire.webp             1687694820364-9d250c054cb2
+asset-lighting.webp         1635468609223-4e59675ac96d
+asset-panel.webp            1544724569-5f546fd6f2b5
+asset-other.webp            1744868562210-fffb7fa882d9
